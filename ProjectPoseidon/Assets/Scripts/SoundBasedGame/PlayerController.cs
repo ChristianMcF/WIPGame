@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     public float lookSpeed;
     public float moveSpeed;
 
+
     // Use this for initialization
     void Start()
     {
@@ -22,6 +23,7 @@ public class PlayerController : MonoBehaviour
         gameObject.transform.localRotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0);
         #endregion
         #region PlayerMovement
+        GetComponent<CharacterController>().SimpleMove((transform.forward * Input.GetAxis("Vertical")) * moveSpeed);
         //gameObject.GetComponent<Rigidbody>().AddRelativeForce((Vector3.forward * Input.GetAxis("Vertical")) * moveSpeed);
         #endregion
     }

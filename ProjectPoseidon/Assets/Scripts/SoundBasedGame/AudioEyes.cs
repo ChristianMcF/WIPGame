@@ -6,6 +6,7 @@ public class AudioEyes : MonoBehaviour
 {
 
     public Transform _playerEyes;
+    private AudioSource aud;
 
     #region AudioGenStuff
     public int position = 0;
@@ -17,8 +18,8 @@ public class AudioEyes : MonoBehaviour
     void Start()
     {
 
-        AudioClip myClip = AudioClip.Create("MySinusoid", samplerate * 2, 1, samplerate, true, OnAudioRead, OnAudioSetPosition);
-        AudioSource aud = GetComponent<AudioSource>();
+        AudioClip myClip = AudioClip.Create("MySinusoid", samplerate, 1, samplerate, false, OnAudioRead, OnAudioSetPosition);
+        aud = GetComponent<AudioSource>();
         aud.clip = myClip;
         aud.Play();
     }
@@ -29,7 +30,16 @@ public class AudioEyes : MonoBehaviour
         RaycastHit _raycasthit;
         Physics.Raycast(_playerEyes.position, _playerEyes.transform.forward, out _raycasthit, 100f);
         Debug.DrawRay(_playerEyes.position, _playerEyes.transform.forward * 100, Color.red);
-        Debug.Log(_raycasthit.collider.tag + "  " + _raycasthit.distance);
+        if (_raycasthit.collider != null)
+        {
+            aud.volume = 0.1f;
+            aud.pitch = 3 / _raycasthit.distance;
+            Debug.Log(_raycasthit.collider.tag + "  " + _raycasthit.distance);
+        }
+        else
+        {
+            aud.volume = 0;
+        }
     }
 
     void OnAudioRead(float[] data)
