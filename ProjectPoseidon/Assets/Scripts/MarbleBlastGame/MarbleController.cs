@@ -13,13 +13,27 @@ public class MarbleController : MonoBehaviour
     public float playerSpeed;
     //Holds the variable which controls the force from the ground the player experiences. Used for jumping
     public float jumpForce;
+    //Holds the variable which controls the players max spin speed
+    public float maxAngularVelocity;
+    //Holds a layermask to ignore certain layers
+    public LayerMask collisionLayerMask;
     //Holds the players rigidbody for easer access
     private Rigidbody _playerRgdBdy;
+
+    private Vector3 camForward;
+    private Vector3 move;
 
     void Start()
     {
         //Assigns the rigidbody to the associated variable
         _playerRgdBdy = GetComponent<Rigidbody>();
+        //Set the players max moving speed
+        _playerRgdBdy.maxAngularVelocity = maxAngularVelocity;
+    }
+
+    void Update()
+    {
+
     }
 
     //Fixed update method, is used when dealing with rigidbodies
@@ -35,17 +49,24 @@ public class MarbleController : MonoBehaviour
                 float moveHorizontal = Input.GetAxis("Horizontal");
                 float moveVertical = Input.GetAxis("Vertical");
 
-                //Add force to the player upon the proper axis.
-                //Set the axis to be itself times the playerspeed variable. Then multiply this by the camera's forward and right direction
-                //respectively, after it has been passed through the MinMaxVector Method.
-                _playerRgdBdy.AddForce((moveVertical * playerSpeed) * MinMaxVector(cameraTransform.forward));
-                _playerRgdBdy.AddForce((moveHorizontal * playerSpeed) * MinMaxVector(cameraTransform.right));
+                //Set the camera's forward to be the camera's current foward transform, multiplied by 1,0,1, removing the y vector, then normalising the result
+                //This keeps the vectors between 1 and 0;
+                camForward = Vector3.Scale(cameraTransform.forward, new Vector3(1, 0, 1)).normalized;
+                //Set the players move direction.
+                move = (moveVertical * camForward + moveHorizontal * cameraTransform.right).normalized;
+                //
+                // ... add torque around the axis defined by the move direction.
+                _playerRgdBdy.AddTorque(new Vector3(move.z, 0, -move.x) * playerSpeed);
 
                 //Get whether the space key is recieved by unity.
-                if (Input.GetKeyUp("space"))
+                if (Input.GetKeyDown("space"))
                 {
-                    //Addforce to the player in the Y direction, by the player's jump force.
-                    _playerRgdBdy.AddForce(new Vector3(0, jumpForce, 0));
+                    RaycastHit groundHit;
+                    if (Physics.Raycast(transform.position, Vector3.down, out groundHit, 1f, collisionLayerMask))
+                    {
+                        //Addforce to the player in the Y direction, by the player's jump force.
+                        _playerRgdBdy.AddForce(new Vector3(0, jumpForce, 0), ForceMode.Impulse);
+                    }
                 }
                 //break out of the switch so the next case does not run
                 break;
@@ -58,41 +79,4 @@ public class MarbleController : MonoBehaviour
                 #endregion
         }
     }
-
-    #region HelpfulMethods
-    //This method is called because without this method, the player would move faster while looking forward, and move slower while
-    //looking down on the player from above.
-    Vector3 MinMaxVector(Vector3 badVector)
-    {
-        //Create a new variable to hold the new vector, and assign it to be the return of the FixFloat Method, with the removal of the y axis.
-        //Once again this aids in making the movement consistent, as without this, the player would move faster going foward than backwards
-        Vector3 goodVector = new Vector3(FixFloat(badVector.x), 0, FixFloat(badVector.z));
-        //Return the fixed vector to the main method
-        return goodVector;
-    }
-
-    //This method sets the floats to an extreme of -1 or 1
-    float FixFloat(float badFloat)
-    {
-        //Create a variable to hold the finalized badfloat
-        float goodFloat;
-        //If the float is more than zero, set it to its extreme of 1
-        if (badFloat > 0)
-        {
-            goodFloat = 1;
-        }
-        //else if the float is less than zero set it to its extreme of -1
-        else if (badFloat < 0)
-        {
-            goodFloat = -1;
-        }
-        else
-        {
-            //Otherwise if the float is 0, set goodfloat to be 0
-            goodFloat = 0;
-        }
-        //Return the float to the MinMaxVector Method
-        return goodFloat;
-    }
-    #endregion
 }
