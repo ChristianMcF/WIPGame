@@ -68,6 +68,10 @@ public class MarbleController : MonoBehaviour
                         _playerRgdBdy.AddForce(new Vector3(0, jumpForce, 0), ForceMode.Impulse);
                     }
                 }
+                if (moveHorizontal != 0 | moveVertical != 0)
+                {
+                    PlaySounds();
+                }
                 //break out of the switch so the next case does not run
                 break;
             #endregion
@@ -77,6 +81,16 @@ public class MarbleController : MonoBehaviour
                 //Player cannot do anything
                 break;
                 #endregion
+        }
+    }
+
+    void PlaySounds()
+    {
+        AudioSource _rollNoise;
+        _rollNoise = GetComponent<AudioSource>();
+        if (!_rollNoise.isPlaying)
+        {
+            _rollNoise.Play();
         }
     }
 }
