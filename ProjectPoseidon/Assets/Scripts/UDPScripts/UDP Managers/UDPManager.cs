@@ -22,7 +22,8 @@ public class UDPManager : MonoBehaviour
     public enum peerType
     {
         Server,
-        Client
+        Client,
+        Both
     }
     ;
     //Holds the info for the currently selected type
@@ -45,6 +46,8 @@ public class UDPManager : MonoBehaviour
     //These variables will hold each instance of the control reciever scripts in the current scene.
     //Holds all the gameobjects which recieve Gyroscope data
     private UDPGyroReciever[] _udpGyroReciever;
+    //Holds the gameobject which will recieve the Main data
+    private UDPGeneralReciever _udpGeneralReciever;
     #endregion
 
     #region Server Variables
